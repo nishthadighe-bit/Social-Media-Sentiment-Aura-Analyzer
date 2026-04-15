@@ -3,20 +3,29 @@ from transformers import pipeline
 import pandas as pd
 import random
 
-# Set Page Config for that "Aesthetic" feel
+# Set Page Config
 st.set_page_config(page_title="VibeCheck AI", page_icon="🎭", layout="centered")
 
-# Custom CSS for the "Onion Pink" and Modern vibe
+# --- FIX: Changed unsafe_allow_status_code to unsafe_allow_html ---
 st.markdown("""
     <style>
     .main { background-color: #fff5f6; }
-    .stButton>button { background-color: #ff91a4; color: white; border-radius: 20px; }
+    .stButton>button { 
+        background-color: #ff91a4; 
+        color: white; 
+        border-radius: 20px; 
+        border: none;
+        padding: 10px 24px;
+    }
+    .stTextArea>div>div>textarea {
+        border-radius: 15px;
+    }
     </style>
-    """, unsafe_allow_status_code=True)
+    """, unsafe_allow_html=True)
 
 @st.cache_resource
 def load_model():
-    # Loading the emotion classifier (DistilBERT)
+    # Loading the emotion classifier
     return pipeline("text-classification", model="bhadresh-savani/distilbert-base-uncased-emotion")
 
 classifier = load_model()
@@ -27,7 +36,7 @@ st.write("### Paste a bio, caption, or message to reveal the true vibe.")
 user_text = st.text_area("Enter Text Here...", placeholder="e.g., 'Building my future in Data Science. ✨'", height=150)
 
 if st.button("ANALYZE VIBE"):
-    if user_text:
+    if user_text.strip():
         results = classifier(user_text)
         emotion = results[0]['label']
         
@@ -53,7 +62,7 @@ if st.button("ANALYZE VIBE"):
         # --- Ghosting Risk Score ---
         ghost_risk = random.randint(10, 40) if emotion in ["joy", "love"] else random.randint(60, 95)
         if len(user_text) < 15: ghost_risk += 10
-        ghost_risk = min(ghost_risk, 100) # Cap at 100%
+        ghost_risk = min(ghost_risk, 100) 
 
         # --- Display Results ---
         st.divider()
@@ -61,7 +70,11 @@ if st.button("ANALYZE VIBE"):
         
         with col1:
             st.metric("Predicted Aura", vibe_info['aura'])
-            st.markdown(f"<div style='width: 100px; height: 100px; background-color: {vibe_info['hex']}; border-radius: 50%; margin: auto;'></div>", unsafe_allow_html=True)
+            st.markdown(f"""
+                <div style='width: 100px; height: 100px; background-color: {vibe_info['hex']}; 
+                border-radius: 50%; margin: 20px auto; border: 3px solid white; box-shadow: 0px 4px 10px rgba(0,0,0,0.1);'>
+                </div>
+                """, unsafe_allow_html=True)
             st.write(f"**Vibe Type:** {vibe_info['vibe']}")
 
         with col2:
@@ -81,3 +94,5 @@ if st.button("ANALYZE VIBE"):
         st.balloons()
     else:
         st.error("Please enter some text first!")
+
+          
